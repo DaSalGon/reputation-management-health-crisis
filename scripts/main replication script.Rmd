@@ -8,12 +8,8 @@ output:
     code_folding: hide
 ---
 
-
-
-
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 require("pacman")
 p_load(ggplot2, ggcorrplot, quanteda, quanteda.textmodels, quanteda.textstats, 
@@ -24,11 +20,13 @@ p_load(ggplot2, ggcorrplot, quanteda, quanteda.textmodels, quanteda.textstats,
 ```
 
 
+# Press conferences by the Mexican Health Secretariat, analysis
+
 ```{r data}
 load("data/datos_valición.medios_gatell.share.RData")
 ```
 
-# Objects from the file
+## Objects from the file
 
 - actors: frequency table of actors participating in the press conferences of the Health Secretary; includes e.g. "PREGUNTA" and "INTERLOCUTOR(|A)" which are cleaned as protocallary elements afterwards
 - data: ...
@@ -40,7 +38,7 @@ rm(strsplit2) # This was used in the conference data generation script
 
 ```
 
-# Get automatically translated Spanish sentiment dictionary
+## Get automatically translated Spanish sentiment dictionary
 
 Download from Harvard dataverse with `r load(url("https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/ALFLK6/2K6ZHD"))`. 
 Source: Proksch, S.-O., Lowe, W., Wäckerle, J. and Soroka, S. (2019), Multilingual Sentiment Analysis: A New Approach to Measuring Conflict in Legislative Speeches. Legislative Studies Quarterly, 44: 97-131. https://doi.org/10.1111/lsq.12218.
@@ -51,7 +49,7 @@ load("../D_Data/auto_dictionaries_lsd.RData")
 rm(list=setdiff(ls(), c("extendeddict_es", list)))
 ```
 
-# Visualizing number of actors
+## Visualizing number of actors
 
 ```{r actors_1}
 actor_number <- data_interventions %>% filter(!grepl("^PREGUNTA$|^INTERLOCUTOR(|A)", actor_name)) %>%
@@ -70,7 +68,7 @@ summary(actor_number$actors_number)
 ```
 
 
-# Aggregated Twitter sentiment data (legitimacy)
+## Aggregated Twitter sentiment data (legitimacy)
 
 Load and visualize data
 
@@ -83,7 +81,7 @@ ggplot(tw.daily_sentiment.legit, aes(x = date, y = sentiment)) + geom_line() + t
 
 ```
 
-# Prep press conference intervention data
+## Prep press conference intervention data
 
 ```{r prep_conference}
 data_interventions <- data_interventions %>%
@@ -101,7 +99,7 @@ data_interventions.aggr <- data_interventions.aggr %>% left_join(actor_number)
 
 ```
 
-# Prepare and merge Twitter data
+## Prepare and merge Twitter data
 
 ```{r tweet_merge}
 
@@ -113,7 +111,7 @@ data_interventions.aggr <- data_interventions.aggr %>% left_join(tw.daily_sentim
 
 Previous transformations conducted here were droppe from the analysis.
 
-# Covid-19 official death toll 
+## Covid-19 official death toll 
 
 Load, adapt and merge data
 
@@ -143,7 +141,7 @@ data_interventions.aggr <- data_interventions.aggr %>%
 
 Previous analyses conducted here have been dropped.
 
-# Create and visualize final indicators
+## Create and visualize final indicators
 
 This code generates Figure 2 of the paper: "Reputational Dimensions in Press Conferences by the Health Secretariat and
 COVID-19 Deaths in Mexico, 2020-2021".
@@ -159,7 +157,8 @@ data_indicadores <- data_indicadores %>% group_by(dimension) %>%
   ungroup() %>% 
   mutate(indicador = value-mean_dimension+0)
 
-data_indicadores <- data_indicadores %>% ungroup() %>% arrange(dimension,date) %>% group_by(dimension) %>% 
+data_indicadores <- data_indicadores %>% ungroup() %>% arrange(dimension,date) %>%
+  group_by(dimension) %>% 
   mutate(indicador_week.ma = zoo::rollapply(indicador,7, mean, align='right', fill=NA)) %>% ungroup() %>% 
   mutate(`Reputational dimension` = case_when(dimension == "funcional_share.cent" ~ "Performative",
                                               dimension == "legal_share.cent" ~ "Legal-procedural",
@@ -180,7 +179,7 @@ reputation_gr/deaths_gr # Use "patchwork" package.
 ```
 
 
-# Transform, complete and generate lead values in the data (including change scores)
+## Transform, complete and generate lead values in the data (including change scores)
 
 ```{r transform_indicators}
 data_meta <- data_interventions.aggr %>% dplyr::select(date, deaths, deaths_week.ma, sentiment, sentiment_week.ma,
@@ -207,7 +206,7 @@ data_indicadores <- data_indicadores %>% arrange(dimension, date) %>%
 ```
 
 
-# Main analyses including sub-analyses
+## Main analyses including sub-analyses
 
 ```{r main_analysis_conduct}
 options(scipen = 999)
@@ -309,12 +308,12 @@ rm(p, is)
 
 ```
 
-# Main results, Table 2
+## Main results, Table 2
 
 This code generates Table 2 of the paper: "Association Analysis between Health Crisis and Reputational Dimensions,
 Health Secretariat Mexico - Press Conference".
 
-```{r main_reg_table}
+```{r main_reg_table, include = FALSE}
 stargazer::stargazer(`Performative--DimensionByDeathsWEEK-MA`, `Performative--DimensionByAllWEEK-MA`,
                      `Technical--DimensionByDeathsWEEK-MA`, `Technical--DimensionByAllWEEK-MA`,
                      `Legal-procedural--DimensionByDeathsWEEK-MA`, `Legal-procedural--DimensionByAllWEEK-MA`,
@@ -326,7 +325,19 @@ stargazer::stargazer(`Performative--DimensionByDeathsWEEK-MA`, `Performative--Di
                      out = "results/var.moving-average_models_28122022.html")
 ```
 
-# Granger causality tests, Table 5 in SM 3
+```{r main_reg_table_2, results = 'asis'}
+stargazer::stargazer(`Performative--DimensionByDeathsWEEK-MA`, `Performative--DimensionByAllWEEK-MA`,
+                     `Technical--DimensionByDeathsWEEK-MA`, `Technical--DimensionByAllWEEK-MA`,
+                     `Legal-procedural--DimensionByDeathsWEEK-MA`, `Legal-procedural--DimensionByAllWEEK-MA`,
+                     `Moral--DimensionByDeathsWEEK-MA`, `Moral--DimensionByAllWEEK-MA`,
+                     type = "html", style = "apsr", report = "vc*sp",
+                     column.labels = c(rep("Performative",2), rep("Technical",2), rep("Legal",2), rep("Moral",2)),
+                     covariate.labels = c("Reputation dimension, t-1", "Covid-19 deaths t-1 - t-7, average",
+                                          "# Actors in Conference","Gatell in Conference (0|1)",
+                                          "Public Sentiment -> Organization t-1 - t-7, average"))
+```
+
+## Granger causality tests, Table 5 in SM 3
 
 This code generates Table 5 in Supplementary Matrial 3: "Granger causality tests of Table 2 and Table 7".
 
@@ -339,18 +350,18 @@ granger_tests <- granger_tests %>% filter(!is.na(Df)) %>%
                                   `Pr(>F)` < 0.01 ~ "***",
                                   TRUE ~ NA_character_))
 
-granger_tests
+granger_tests %>% knitr::kable()
 
 openxlsx::write.xlsx(granger_tests, file = "results/granger_tests.results.xlsx")
 
 ```
 
 
-# Public Legitimacy Simple Models, Table 6 in SM 4
+## Public Legitimacy Simple Models, Table 6 in SM 4
 
 This code generates Table 6 in the Supplementary Material 4.
 
-```{r public_legit}
+```{r public_legit, include = FALSE}
 
 stargazer::stargazer(`Performative--DimensionTwitterWEEK-MA`, 
                      `Technical--DimensionTwitterWEEK-MA`,
@@ -363,7 +374,20 @@ stargazer::stargazer(`Performative--DimensionTwitterWEEK-MA`,
 
 ```
 
-# Save "data_indicadores" separately
+```{r public_legit_2, results = 'asis'}
+
+
+stargazer::stargazer(`Performative--DimensionTwitterWEEK-MA`, 
+                     `Technical--DimensionTwitterWEEK-MA`,
+                     `Legal-procedural--DimensionTwitterWEEK-MA`,
+                     `Moral--DimensionTwitterWEEK-MA`, type = "html", style = "apsr", report = "vc*sp",
+                     column.labels = c(rep("Performative",1), rep("Technical",1), rep("Legal",1), rep("Moral",1)),
+                     covariate.labels = c("Reputation dimension, t-1",
+                                          "Public Sentiment -> Organization t-1 - t-7, average"))
+
+```
+
+## Save "data_indicadores" separately
 
 ```{r}
 
@@ -398,13 +422,13 @@ time_aggr <- data_comunicados %>%
 ggplot(time_aggr, aes(date_month, n)) + geom_smooth(span = 0.4, colour = "black") + ylab("# Press Releases Health Secretary") +
   xlab("Time (Monthly)") + theme_minimal()
 
-ggsave(filename="results/R_Results_December2022/press_releases_number.png", 
+ggsave(filename="results/press_releases_number.png", 
       plot=last_plot(), device="png", units="cm", width=20, height=8, dpi=300)
 
 ```
 
 
-# Uploading dictionary
+## Uploading dictionary
 
 ```{r reputation_dict}
 dictionary.reputation <- openxlsx::read.xlsx("data/ReputationDimensions_Dictionary_v1.xlsx") %>% 
@@ -424,7 +448,7 @@ dictionary.reputation <- quanteda::dictionary(list(
 
 ```
 
-# Analysis press releases
+## Analysis press releases
 
 Defining corpus and extracting reputation strategic dimension frequencies
 
@@ -449,7 +473,7 @@ rm(press_corpus, press_tokens, press_dfm)
 
 ```
 
-# Merge Twitter and Covid-19 death toll data
+## Merge Twitter and Covid-19 death toll data
 
 ```{r second_data}
 
@@ -465,7 +489,7 @@ daily_texts <- daily_texts %>%
 
 ```
 
-# New indicadores data for press releases
+## New indicadores data for press releases
 
 ```{r}
 data_indicadores <- daily_texts %>%
@@ -479,7 +503,7 @@ data_indicadores <- data_indicadores %>% group_by(dimension) %>%
   mutate(indicador = value-mean_dimension+0)
 ```
 
-# Visualize new data
+## Visualize new data
 
 This code generates Figure 1 of the paper: "Reputational Dimensions in Press Releases by the Health Secretariat, 2013-2022".
 
@@ -508,7 +532,7 @@ reputation_gr
 
 ```
 
-# Last press release transformation before analysis
+## Last press release transformation before analysis
 
 ```{r transform_press_rel}
 
@@ -529,11 +553,11 @@ data_indicadores <- data_indicadores %>% arrange(dimension, date) %>%
 
 ```
 
-# VAR models - press releases, Table 7 in SM 5
+## VAR models - press releases, Table 7 in SM 5
 
 This codes generates Table 7 in Supplementary Material 7: "Association Analysis between Health Crisis and Reputational Dimensions in Press Releases 2020-2022, Health Secretariat Mexico - Press Releases".
 
-```{r}
+```{r rel_analysis, include = FALSE}
 
 issue_list <- c("Performative","Legal-procedural","Moral","Technical")
 
@@ -589,6 +613,23 @@ stargazer::stargazer(`Performative--DimensionByDeaths`,
 
 ```
 
+```{r, results = 'asis'}
+
+stargazer::stargazer(`Performative--DimensionByDeaths`,
+                     `Performative--DimensionByAll`,
+                     `Technical--DimensionByDeaths`,
+                     `Technical--DimensionByAll`,
+                     `Legal-procedural--DimensionByDeaths`,
+                     `Legal-procedural--DimensionByAll`,
+                     `Moral--DimensionByDeaths`,
+                     `Moral--DimensionByAll`,
+                     type = "html", style = "apsr", report = "vc*sp",
+                     column.labels = c(rep("Performative",2), rep("Technical",2), rep("Legal",2), rep("Moral",2)),
+                     covariate.labels = c("Reputation dimension, t-1", "Covid-19 deaths t-1 - t-7, average",
+                                          "Public Sentiment -> Organization t-1 - t-7, average"))
+
+```
+
 
 # Comparing indicators
 
@@ -597,7 +638,6 @@ Comparing reputational strategic dimension indicators from press releases and pr
 This code generate Table 4 in Suppplementary Material 2: "Table 4. Reputational Dimension Correlations between Press Conferences and Press Releases, Mexican Health Secretariat 2020-2021 (day level)".
 
 ```{r comparing_indicators}
-
 indicadores_conferencia <- data_indicadores.conferences %>%
   dplyr::select(date, dimension, indicador) %>% 
   filter(grepl("cent", dimension))
@@ -608,16 +648,34 @@ indicadores_press.releases <- data_indicadores %>% dplyr::select(date, dimension
 
 indicadores <- left_join(indicadores_conferencia, indicadores_press.releases)
 rm(indicadores_conferencia, indicadores_press.releases)
+```
 
+
+Functional-performative dimension correlation
+
+```{r comparing_indicators1}
 cor.test(indicadores$indicador[indicadores$dimension=="funcional_share.cent"],
          indicadores$indicador_press.releases[indicadores$dimension=="funcional_share.cent"])
+```
 
+Legal dimension correlation
+
+```{r comparing_indicators2}
 cor.test(indicadores$indicador[indicadores$dimension=="legal_share.cent"],
          indicadores$indicador_press.releases[indicadores$dimension=="legal_share.cent"])
+```
 
+
+Technical dimension correlation
+
+```{r comparing_indicators3}
 cor.test(indicadores$indicador[indicadores$dimension=="tecnico_share.cent"],
          indicadores$indicador_press.releases[indicadores$dimension=="tecnico_share.cent"])
+```
 
+Moral dimension correlation
+
+```{r comparing_indicators4}
 cor.test(indicadores$indicador[indicadores$dimension=="moral_share.cent"],
          indicadores$indicador_press.releases[indicadores$dimension=="moral_share.cent"])
 
@@ -625,20 +683,37 @@ cor.test(indicadores$indicador[indicadores$dimension=="moral_share.cent"],
 
 # Dicitionary, adapted in Spanish
 
-```{r dict_pring}
+Primary source: Busuioc, Madalina, and Dovilė Rimkutė. 2020. Meeting expectations in the EU regulatory state? Regulatory communications amid conflicting institutional demands. Journal of European Public Policy 27(4): 547–568.
 
+```{r dict_print}
 dictionary.reputation <- openxlsx::read.xlsx("data/reputationDimensions_Dictionary_v1.xlsx") %>% 
   filter(!is.na(palabra))
+```
 
+Functional-performative dimension wording
+
+```{r dict_print1}
 as.character(dictionary.reputation %>% filter(dictionary=="funcional") %>% dplyr::select(palabra) %>% 
-  summarise(paste0(., collapse = ", "))) %>% gsub('["]',"",.) 
+  summarise(paste0(., collapse = ", "))) %>% gsub('["]',"",.)
+```
 
+Legal dimension wording
+```{r dict_print2}
 as.character(dictionary.reputation %>% filter(dictionary=="legal") %>% dplyr::select(palabra) %>% 
-  summarise(paste0(., collapse = ", "))) %>% gsub('["]',"",.) 
+  summarise(paste0(., collapse = ", "))) %>% gsub('["]',"",.)
+```
 
+
+Moral dimension wording
+
+```{r dict_print3}
 as.character(dictionary.reputation %>% filter(dictionary=="moral") %>% dplyr::select(palabra) %>% 
-  summarise(paste0(., collapse = ", "))) %>% gsub('["]',"",.) 
+  summarise(paste0(., collapse = ", "))) %>% gsub('["]',"",.)
+```
 
+Technical dimension wording
+
+```{r dict_print4}
 as.character(dictionary.reputation %>% filter(dictionary=="tecnico") %>% dplyr::select(palabra) %>% 
   summarise(paste0(., collapse = ", "))) %>% gsub('["]',"",.) 
 

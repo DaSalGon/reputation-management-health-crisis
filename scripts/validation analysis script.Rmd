@@ -1,0 +1,72 @@
+---
+title: "Replication code - validation analysis: Reputation management during a public health crisis: Overcompensating when all else fails. PAR, 2023."
+author: "Varela Castro, Bustos & Saldivia Gonzatti"
+date: "26 4 2023"
+output: 
+  html_document:
+    toc: false
+    code_folding: hide
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+require("pacman")
+p_load(ggplot2, ggcorrplot, quanteda, quanteda.textmodels, quanteda.textstats, 
+       quanteda.textplots, stringi, tibble, purrr, tidyr, stm,
+       readtext, openxlsx, ggcorrplot, devtools, newsmap, seededlda, stopwords, 
+       ggpubr, lubridate,stringr, car,
+       rmarkdown, dplyr, tidyverse, igraph, RcppRoll, patchwork, dynlm, lmtest, sandwich, vars)
+```
+
+## Load original data
+
+```{r original}
+load("data/datos_valición.medios_gatell.share.RData")
+rm(list=setdiff(ls(), c("gatell_sh.random")))
+
+```
+
+
+## Load manually coded data; merge
+
+```{r load manually_coded}
+
+edgar.vali <- openxlsx::read.xlsx("data/validación_quali_EdgarBustos.xlsx") %>% filter(!is.na(moral_quali))
+samanta.vali <- openxlsx::read.xlsx("data/validación_quali_SamantaVarela.xlsx") %>% filter(!is.na(moral_quali))
+daniel.vali <- openxlsx::read.xlsx("data/validación_quali_SaldiviaGonzatti.xlsx") %>% filter(!is.na(moral_quali))
+
+valid_data.edgar_base.MEAN <- edgar.vali %>% bind_rows(samanta.vali) %>% 
+  bind_rows(daniel.vali) %>% group_by(doc_id, words) %>% 
+  summarise(across(c(legal_quali:tecnico_quali), ~ mean(., na.rm = TRUE)))
+
+```
+
+## Merge original and manually coded data
+
+```{r merge}
+
+valid_data.edgar_base.MEAN <- valid_data.edgar_base.MEAN %>% left_join(gatell_sh.random %>% filter(!duplicated(paste0(doc_id, words))))
+
+rm(samanta.vali, edgar.vali, daniel.vali)
+
+
+
+```
+
+## Straightforward, simple correlational analysis
+
+```{r}
+
+options(scipen = 999)
+
+cor.test(valid_data.edgar_base.MEAN$legal_quali, valid_data.edgar_base.MEAN$legal_share)
+cor.test(valid_data.edgar_base.MEAN$moral_quali, valid_data.edgar_base.MEAN$moral_share)
+cor.test(valid_data.edgar_base.MEAN$funcional_quali, valid_data.edgar_base.MEAN$funcional_share)
+cor.test(valid_data.edgar_base.MEAN$tecnico_quali, valid_data.edgar_base.MEAN$tecnico_share)
+
+```
+
+
+

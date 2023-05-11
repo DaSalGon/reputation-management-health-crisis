@@ -165,10 +165,13 @@ data_indicadores <- data_indicadores %>% ungroup() %>% arrange(dimension,date) %
                                               dimension == "tecnico_share.cent" ~ "Technical",
                                               dimension == "moral_share.cent" ~ "Moral"))
 
+# For illustration purposes, we multiply the indicators/indices by 100.
+# Since the indicator is interesting only in relative change, this adaption only simplifies readability.
+
 reputation_gr <- ggplot(data_indicadores %>% dplyr::rename(`Reputational\nDimension` = `Reputational dimension`) %>% 
                           filter(!grepl("Flesch|senti[.]ton|senti|actor", `Reputational\nDimension`)) %>% 
                           filter(!is.na(`Reputational\nDimension`)),
-       aes(x = date, y = indicador_week.ma,  colour = `Reputational\nDimension`)) +
+       aes(x = date, y = indicador_week.ma*100,  colour = `Reputational\nDimension`)) +
   geom_smooth(span = 0.5) + theme_minimal() + xlab("Weekly Trend Daily") + ylab("Indicator") #+
 
 deaths_gr <- ggplot(data_indicadores %>% filter(dimension=="deaths"))+ ylab("Daily Deaths") + xlab("Date") +

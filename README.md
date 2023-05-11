@@ -27,6 +27,6 @@ Both .rmd files replicate the analyses and results in the paper with the data av
 
 ## Data
 
-Beside the above mentioned data, you need to download the Spanish sentiment dictionary from the source. Refer to the Spanish sentiment dictionary by [Proksch et al. (2019)](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/ALFLK6&version=1.0). Do refer to the original, non-translated [Lexicoder Sentiment Dictionary (LSD)](https://www.snsoroka.com/data-lexicoder/) by Daku, Young and Soroka.
+Beside the above mentioned data, you need to download the Spanish sentiment dictionary from the source (see code comment in the `.Rmd` script). Concerning the Spanish sentiment dictionary, refer to [Proksch et al. (2019)](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/ALFLK6&version=1.0). Do refer to the original, non-translated [Lexicoder Sentiment Dictionary (LSD)](https://www.snsoroka.com/data-lexicoder/) by Daku, Young and Soroka.
 
 

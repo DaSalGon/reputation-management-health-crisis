@@ -10,12 +10,16 @@ The data folder includes two unique text-datasets based on public information fr
 author = {Varela Castro, Samanta and Bustos, Edgar O. and Saldivia Gonzatti, Daniel},
 title = {Reputation management during a public health crisis: Overcompensating when all else fails},
 journal = {Public Administration Review},
-volume = {n/a},
-number = {n/a},
-pages = {},
+volume = {83},
+number = {5},
+pages = {1234-1245},
 doi = {https://doi.org/10.1111/puar.13638},
 url = {https://onlinelibrary.wiley.com/doi/abs/10.1111/puar.13638},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1111/puar.13638},
+year = {2023}
 }
+
+
 ```
 Do cite the paper when using the reputational dimension dictionary in Spanish (see data folder). Do refer to the original dicitionary in English by [Busuioc and Rimkuté (2020)](https://www.tandfonline.com/doi/full/10.1080/13501763.2019.1603248).
 

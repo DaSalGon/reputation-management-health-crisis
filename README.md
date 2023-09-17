@@ -16,8 +16,6 @@ pages = {1234-1245},
 doi = {https://doi.org/10.1111/puar.13638},
 year = {2023}
 }
-
-
 ```
 Do cite the paper when using the reputational dimension dictionary in Spanish (see data folder). Do refer to the original dicitionary in English by [Busuioc and Rimkuté (2020)](https://www.tandfonline.com/doi/full/10.1080/13501763.2019.1603248).
 

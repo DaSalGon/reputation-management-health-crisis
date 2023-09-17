@@ -1,5 +1,5 @@
 # reputation-management-health-crisis
-Replication material for Varela Castro, Bustos &amp; Saldivia Gonzatti (2023). Reputation management during a public health crisis: Overcompensating when all else fails. PAR, Online first. [https://onlinelibrary.wiley.com/doi/10.1111/puar.13638]
+Varela Castro, Samanta, Bustos, Edgar O., and Saldivia Gonzatti, Daniel. 2023. “ Reputation Management during a Public Health Crisis: Overcompensating When All Else Fails.” Public Administration Review 83(5): 1234–1245. [https://onlinelibrary.wiley.com/doi/10.1111/puar.13638]
 
 This repository contains code to reproduce the analyses in Varela Castro, Bustos &amp; Saldivia Gonzatti (2023).
 
@@ -14,8 +14,6 @@ volume = {83},
 number = {5},
 pages = {1234-1245},
 doi = {https://doi.org/10.1111/puar.13638},
-url = {https://onlinelibrary.wiley.com/doi/abs/10.1111/puar.13638},
-eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1111/puar.13638},
 year = {2023}
 }
 
